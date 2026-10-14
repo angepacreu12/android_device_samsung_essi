@@ -1,5 +1,27 @@
 # essi: LineageOS / e/OS for the Samsung Galaxy A56 5G (SM-A566B)
 
+> [!WARNING]
+> **WORK IN PROGRESS.** This is an unfinished, experimental port for developers, not a daily-driver ROM. Some
+> features are untested or missing ([`docs/UNVERIFIED_WORK.md`](docs/UNVERIFIED_WORK.md)).
+
+> [!CAUTION]
+> **No warranty, no liability.** Everything here is provided "as is", without warranty of any kind (see
+> [`LICENSE`](LICENSE)). Unlocking the bootloader, flashing custom images or modifying partitions can:
+> - **brick** your device;
+> - erase your data;
+> - trip Samsung Knox (permanently disabling Samsung Pay, Secure Folder and similar features) and void your warranty;
+> - break the modem, IMEI or emergency calling.
+>
+> You do all of it at your own risk. The author and contributors are **not responsible** for any damage to
+> devices, data loss, lost service, or any other consequence of using this repository. Never flash a One UI 8
+> (Android 16) bootloader on this device: it removes the OEM unlock option.
+
+> [!NOTE]
+> **Takedown requests.** This repository contains no Samsung binaries (see [`NOTICE`](NOTICE)). If you hold rights
+> to any content here and want it removed (DMCA or similar), email **ange.pacreu@epitech.eu**. Name the files
+> concerned and the basis of the claim; I will review and act promptly. You can also use
+> [GitHub's DMCA process](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy).
+
 This repository has four parts:
 
 - a device tree;
@@ -14,8 +36,7 @@ This repository has four parts:
 | Stock firmware used | A566BXXS6AYGE (Android 15, kernel 6.6.50) |
 | Base | /e/OS v4.3-a15 = LineageOS 22.2 (`lineage-22.2`, Android 15) |
 
-> **Status: work in progress, for developers.** It boots and the main hardware works (see below). Read
-> [`docs/UNVERIFIED_WORK.md`](docs/UNVERIFIED_WORK.md) before you flash anything.
+**Status:** it boots and the main hardware works (see [What works](#what-works-a15-base-as-tested-on-01-02102026)).
 
 ## Highlights
 
