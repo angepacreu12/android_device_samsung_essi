@@ -1,0 +1,21 @@
+on init
+    write /proc/sys/kernel/hung_task_timeout_secs 0
+    start watchdogd
+
+on late-init
+    setprop sys.usb.controller 13200000.dwc3
+    setprop ro.debuggable 1
+    setprop service.adb.root 1
+    setprop sys.usb.configfs 1
+    setprop sys.usb.config adb
+
+on boot
+    start vendor.boot-default
+
+# Feed the SoC watchdog. Recovery ramdisk files are labelled rootfs, so the
+# watchdogd domain cannot be entered; run it in the (permissive) recovery domain.
+service watchdogd /system/bin/watchdogd 10 20
+    class core
+    user root
+    oneshot
+    seclabel u:r:recovery:s0

@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 dxjsk
+# SPDX-License-Identifier: Apache-2.0
+
+# essi boot log catcher (debug builds only: the domain is permissive on userdebug/eng, inert on user).
+# Off by default since 01/10: its logs filled /metadata and a recovery sideload failed on /metadata/ota/state
+# ("No space left on device"). The script runs at every boot but only deletes old logs unless it is enabled:
+#   - from the very start of boot: create /metadata/essi_log/enable (adb root, or a recovery shell);
+#   - from /data mount on (persistent props are loaded then): setprop persist.vendor.essi.bootlog 1.
+# Whenever it runs, essi_bootlog.sh stops at a hard size cap (see the script).
+on init
+    mkdir /metadata/essi_log 0770 root root
+    start essi_bootlog
+
+on property:persist.vendor.essi.bootlog=1
+    start essi_bootlog
+
+service essi_bootlog /vendor/bin/essi_bootlog.sh
+    user root
+    group root log
+    oneshot
+    disabled

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Screen edges. Stock framework-res.apk is overridden on the device by Samsung's product overlay
+     /product/overlay/framework-res__a56xnaxx__auto_generated_rro_product.apk, so the values below are that
+     overlay's, not framework-res's (docs/SCREEN_0927.md).
+       PRO :N = line N of reference/stock/extra/screen/stock_rro_product.txt (aapt2 dump of the product overlay)
+       FR :N  = line N of `zcat reference/stock/extra/system/framework-res.resources.txt.gz`
+     Density is 450 on stock (reference/stock/extra/vendor/build.prop:194) and ours (device/BoardConfig.mk:38),
+     so the px values mean the same size here.
+     Not repeated because stock equals the AOSP default: status_bar_height_default 24dp (FR :360362),
+     rounded_corner_content_padding 0dp (reference/stock/extra/screen/stock_fw_0397.txt:3). -->
+<resources>
+    <!-- PRO :807-808. Fallback radius; the top/bottom values below win where set (RoundedCorners.java:170-178). -->
+    <dimen name="rounded_corner_radius">128px</dimen>
+    <!-- PRO :813-814 (framework-res had 36dp, FR :358891) -->
+    <dimen name="rounded_corner_radius_top">36dp</dimen>
+    <!-- PRO :810-811 (framework-res had 36dp, FR :358879) -->
+    <dimen name="rounded_corner_radius_bottom">36dp</dimen>
+    <!-- PRO :822-823. 92px at 450 dpi = 32.7dp, the bottom of the camera hole in config_mainBuiltInDisplayCutout
+         (8.18 + 24.53 dp, config.xml). -->
+    <dimen name="status_bar_height_portrait">92px</dimen>
+    <!-- FR :360364-360365. The product overlay does not set it, so stock keeps framework-res's literal 24dp.
+         AOSP defines it as @dimen/status_bar_height_portrait (frameworks/base core/res/res/values/dimens.xml:56),
+         which would turn it into 92px here. -->
+    <dimen name="status_bar_height_landscape">24dp</dimen>
+</resources>

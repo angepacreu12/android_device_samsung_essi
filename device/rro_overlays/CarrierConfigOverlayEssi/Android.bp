@@ -1,0 +1,13 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Carrier config for Free (208/15): VoLTE available, so Settings shows the 4G calling switch.
+// Same module shape as LineageOS android_device_xiaomi_sm8250-common (lineage-22.2 1f60b5d)
+// rro_overlays/CarrierConfigOverlayCommon/Android.bp. See docs/IMS_1001.md §1.
+runtime_resource_overlay {
+    name: "CarrierConfigOverlayEssi",
+    vendor: true,
+    aaptflags: ["--keep-raw-values"],
+}

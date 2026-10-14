@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Wi-Fi calling (docs/IMS_1001.md §2). Added to DEVICE_PACKAGE_OVERLAYS only when PhhIms and
+    QualifiedNetworksService are both in the tree (device.mk IMS block), so these names never point at a
+    package the image lacks. AOSP defaults: fw/base 5c05c66e core/res/res/values/config.xml:3828,
+    config_telephony.xml:117, :142, :151 (false / empty).
+-->
+<resources>
+    <!-- Stock framework-res sets it true: reference/stock/extra/system/framework-res.resources.txt.gz :390514-390515. -->
+    <bool name="config_device_wfc_ims_available">true</bool>
+
+    <!-- Iwlan (packages/services/Iwlan, LineageOS lineage-22.2 83bd433): package com.google.android.iwlan
+         (AndroidManifest.xml:5) serves both the WLAN data and network services (:22-35). -->
+    <string name="config_wlan_data_service_package" translatable="false">com.google.android.iwlan</string>
+    <string name="config_wlan_network_service_package" translatable="false">com.google.android.iwlan</string>
+
+    <!-- QualifiedNetworksService (AOSP packages/services/QualifiedNetworksService). Package name from the PhhIms
+         fork's integration notes, W22 README.md:191; its own manifest could not be opened from here. Telephony
+         binds it by this name (opt_telephony 6feb405d AccessNetworksManager.java:538-541). -->
+    <string name="config_qualified_networks_service_package" translatable="false">com.android.telephony.qns</string>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    PhhIms (packages/apps/PhhIms, xuanyayi/ims-for-wisdom lineage-22.2 @ 4562d77e, GPL-2.0).
+    Its manifest requests one privileged permission, READ_PRIVILEGED_PHONE_STATE
+    (app/src/main/AndroidManifest.xml:11). Same allowlist as the fork's integration notes
+    (README.md:345-364 @ 353a65b), minus MODIFY_PHONE_STATE, which this branch does not request.
+    See docs/IMS_STEP1_0928.md.
+-->
+<permissions>
+    <privapp-permissions package="me.phh.ims">
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+    </privapp-permissions>
+</permissions>

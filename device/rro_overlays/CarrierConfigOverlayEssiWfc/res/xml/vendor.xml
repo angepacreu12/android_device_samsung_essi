@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Free Mobile, mcc 208 mnc 15 (carrierId 1958): VoLTE as in CarrierConfigOverlayEssi, plus Wi-Fi calling.
+    Every value is the one LineageOS android_device_fairphone_FP5 (lineage-22.2 09734dc) sets for this carrier,
+    overlay/CarrierConfigResCommon/res/xml/vendor.xml:893-910; only AOSP keys are kept
+    (fw/base 5c05c66e CarrierConfigManager.java). The live config has carrier_wfc_ims_available_bool = false
+    (docs/response_0928.md:21). See docs/IMS_1001.md §2.
+-->
+<carrier_config_list>
+    <carrier_config mcc="208" mnc="15">
+        <!-- FP5 :894-896 -->
+        <boolean name="hide_enhanced_4g_lte_bool" value="false" />
+        <boolean name="enhanced_4g_lte_on_by_default_bool" value="true" />
+        <boolean name="carrier_volte_available_bool" value="true" />
+        <!-- FP5 :902-904, :907-910. Mode 2 = WIFI_MODE_WIFI_PREFERRED (ImsMmTelManager.java:104).
+             Wi-Fi calling stays off until the user turns it on (default_wfc_ims_enabled false). -->
+        <boolean name="carrier_wfc_ims_available_bool" value="true" />
+        <boolean name="carrier_default_wfc_ims_enabled_bool" value="false" />
+        <boolean name="carrier_default_wfc_ims_roaming_enabled_bool" value="false" />
+        <boolean name="editable_wfc_roaming_mode_bool" value="true" />
+        <boolean name="editable_wfc_mode_bool" value="true" />
+        <int name="carrier_default_wfc_ims_mode_int" value="2" />
+        <int name="carrier_default_wfc_ims_roaming_mode_int" value="2" />
+    </carrier_config>
+</carrier_config_list>

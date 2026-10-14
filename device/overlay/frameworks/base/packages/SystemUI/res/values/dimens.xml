@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SystemUI values. Built as an RRO by DEVICE_PACKAGE_OVERLAYS + PRODUCT_ENFORCE_RRO_TARGETS := * (device.mk). -->
+<resources>
+    <!-- Lock-screen fingerprint icon (docs/FINGERPRINT_1001.md §11). SystemUI sizes the icon as
+         udfps_icon_size (6000 um) / pixel_pitch and pads it by (sensor width - icon size) / 2
+         (fw/base 5c05c66e packages/SystemUI/src/.../biometrics/domain/interactor/UdfpsOverlayInteractor.kt:55-57,124-131).
+         The AOSP default pixel_pitch is -1 (packages/SystemUI/res/values/dimens.xml:2080), which gives an icon of
+         -6000 px and a padding of 3113 px inside a 226 px view, so the icon is drawn huge and clipped.
+         Value: 25400 um per inch / yDpi 388.47058 (docs/logs/fp_1001/5_display_props.txt:4) = 65.385 um per px,
+         the same yDpi the sensor position uses (core overlay config.xml). Icon 6000 / 65.385 = 91 px,
+         padding (226 - 91) / 2 = 67 px. -->
+    <item name="pixel_pitch" format="float" type="dimen">65.385</item>
+</resources>

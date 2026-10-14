@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Free Mobile, mcc 208 mnc 15 (carrierId 1958). The live carrier config has
+    carrier_volte_available_bool = false (docs/response_0928.md:16), which hides the 4G calling switch
+    (docs/IMS_1001.md §1). The three values are the ones LineageOS android_device_fairphone_FP5
+    (lineage-22.2 09734dc) sets for this carrier: overlay/CarrierConfigResCommon/res/xml/vendor.xml:893-896.
+    Wi-Fi calling keys are left out on purpose: no WLAN data service is in the image yet (docs/IMS_1001.md §2).
+-->
+<carrier_config_list>
+    <carrier_config mcc="208" mnc="15">
+        <boolean name="hide_enhanced_4g_lte_bool" value="false" />
+        <boolean name="enhanced_4g_lte_on_by_default_bool" value="true" />
+        <boolean name="carrier_volte_available_bool" value="true" />
+    </carrier_config>
+</carrier_config_list>

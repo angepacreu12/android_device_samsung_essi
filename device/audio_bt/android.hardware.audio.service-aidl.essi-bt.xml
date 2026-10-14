@@ -1,0 +1,12 @@
+<!-- Registered by /vendor/bin/hw/android.hardware.audio.service-aidl.essi-bt (service.cpp).
+     Version 3 = latest_android_hardware_audio_core in lineage-22.2 (hardware/interfaces
+     audio/aidl/Android.bp:205), as in AOSP's android.hardware.audio.service-aidl.xml. The
+     IBluetoothAudioProviderFactory/default entry comes with android.hardware.bluetooth.audio-impl
+     (its bluetooth_audio.xml), registered by the same binary. -->
+<manifest version="1.0" type="device">
+    <hal format="aidl">
+        <name>android.hardware.audio.core</name>
+        <version>3</version>
+        <fqname>IModule/a2dp</fqname>
+    </hal>
+</manifest>

@@ -1,0 +1,36 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// AOSP Bluetooth audio module and AOSP Bluetooth audio provider, in one process.
+// The provider (android.hardware.bluetooth.audio-impl) and the module's stream share their
+// session through a per-process map in libbluetooth_audio_session_aidl, so both must live in
+// the same process. Samsung's audio HAL serves neither. See docs/BT_AUDIO_1001.md.
+// Dependencies copied from AOSP's android.hardware.audio.service-aidl.example
+// (hardware/interfaces/audio/aidl/default/Android.bp:124-145, lineage-22.2).
+cc_binary {
+    name: "android.hardware.audio.service-aidl.essi-bt",
+    relative_install_path: "hw",
+    init_rc: ["android.hardware.audio.service-aidl.essi-bt.rc"],
+    vintf_fragments: ["android.hardware.audio.service-aidl.essi-bt.xml"],
+    defaults: [
+        "aidlaudioservice_defaults",
+        "latest_android_hardware_audio_core_sounddose_ndk_shared",
+        "latest_android_hardware_audio_core_ndk_shared",
+        "latest_android_hardware_bluetooth_audio_ndk_shared",
+        "latest_android_media_audio_common_types_ndk_shared",
+    ],
+    static_libs: [
+        "libaudioserviceexampleimpl",
+    ],
+    shared_libs: [
+        "android.hardware.bluetooth.audio-impl",
+        "libaudio_aidl_conversion_common_ndk",
+        "libbluetooth_audio_session_aidl",
+        "liblog",
+        "libmedia_helper",
+        "libstagefright_foundation",
+    ],
+    srcs: ["service.cpp"],
+}

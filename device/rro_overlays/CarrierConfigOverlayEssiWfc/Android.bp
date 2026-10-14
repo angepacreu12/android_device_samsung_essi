@@ -1,0 +1,14 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Carrier config for Free (208/15): CarrierConfigOverlayEssi plus Wi-Fi calling. device.mk installs one of the two:
+// this one only when QualifiedNetworksService is in the tree (two overlays of the same vendor.xml do not merge).
+// Same module shape as LineageOS android_device_xiaomi_sm8250-common (lineage-22.2 1f60b5d)
+// rro_overlays/CarrierConfigOverlayCommon/Android.bp. See docs/IMS_1001.md §1.
+runtime_resource_overlay {
+    name: "CarrierConfigOverlayEssiWfc",
+    vendor: true,
+    aaptflags: ["--keep-raw-values"],
+}

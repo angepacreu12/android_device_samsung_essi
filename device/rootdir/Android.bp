@@ -1,0 +1,12 @@
+//
+// SPDX-FileCopyrightText: The LineageOS Project
+// SPDX-License-Identifier: Apache-2.0
+//
+
+// Init configuration files
+// fstab
+prebuilt_etc {
+    name: "fstab.ramplus",
+    src: "etc/fstab.ramplus",
+    vendor: true,
+}

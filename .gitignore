@@ -1,0 +1,16 @@
+*.img
+*.img.*
+prebuilt/
+tools/deps/
+tools/out/
+__pycache__/
+
+# Samsung binaries and Samsung-derived files: never committed, regenerated locally (see README.md)
+/device/prebuilts/kernel
+/device/prebuilts/vendor_ramdisk/
+/device/prebuilts/modules/**/*.ko
+/device/sepolicy/vendor/
+/reference/stock/
+/reference/ours/
+/device/adb_keys
+/firmware/

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Device overlay for framework-res, built as framework-res__essi__auto_generated_rro_vendor.apk
+    (device.mk: DEVICE_PACKAGE_OVERLAYS + PRODUCT_ENFORCE_RRO_TARGETS := *).
+
+    Every value below is stock's (A566BXXS6AYGE), cited as:
+      RRO :N  = line N of `zcat reference/stock/extra/vendor/overlay_framework-res__a56xnaxx__auto_generated_rro_vendor.resources.txt.gz`
+                (Samsung's own vendor overlay for framework-res on this device)
+      FR :N   = line N of `zcat reference/stock/extra/system/framework-res.resources.txt.gz` (stock framework-res.apk)
+      PRO :N  = line N of reference/stock/extra/screen/stock_rro_product.txt (Samsung's product overlay for
+                framework-res, framework-res__a56xnaxx__auto_generated_rro_product.apk)
+    Stock values equal to the AOSP default are not repeated here; docs/BOOT_0927.md §2 lists them.
+-->
+<resources>
+    <!-- Navigation bar: RRO :36-37 (true); framework-res itself has false (FR :391258). -->
+    <bool name="config_showNavigationBar">true</bool>
+
+    <!-- Display cutout (front camera hole), from the product overlay: PRO :857-858. Framework-res has "" (FR :85760).
+         config_mainBuiltInDisplayCutoutRectApproximation is not set by the product overlay; its default is
+         @string/config_mainBuiltInDisplayCutout on stock (FR :85765-85766) and in AOSP (config.xml:4124). -->
+    <string name="config_mainBuiltInDisplayCutout" translatable="false">M 0,0 M 0, 8.177777777777778 a 12.26666666666667,12.26666666666667 0 1,0 0,24.53333333333333 a 12.26666666666667,12.26666666666667 0 1,0 0,-24.53333333333333 Z @dp</string>
+    <!-- PRO :776-777 (framework-res: false, FR :390808) -->
+    <bool name="config_fillMainBuiltInDisplayCutout">true</bool>
+
+    <!-- Display, from the vendor RRO -->
+    <!-- RRO :49-50 (framework-res: 60, FR :388267) -->
+    <integer name="config_defaultRefreshRate">120</integer>
+    <!-- RRO :4-6 -->
+    <integer-array name="config_availableColorModes">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </integer-array>
+    <!-- RRO :33-34 -->
+    <bool name="config_setColorTransformAccelerated">true</bool>
+    <!-- RRO :42-43 -->
+    <bool name="config_unplugTurnsOnScreen">true</bool>
+
+    <!-- Automatic brightness: the legacy lux -> backlight pair stock uses.  Levels FR :367032-367036
+         (12 thresholds), backlight values FR :367021-367026 (13 values).  Stock leaves the nits-based
+         arrays empty (config_autoBrightnessDisplayValuesNits FR :367010, config_screenBrightnessNits
+         FR :367916, config_screenBrightnessBacklight FR :367912), so they are not set here either.
+         config_screenBrightnessSettingMinimum/Maximum/Default are 10/255/102 in stock (FR :388885,
+         :388882, :388879) = AOSP defaults, not repeated. -->
+    <integer-array name="config_autoBrightnessLevels">
+        <item>1</item>
+        <item>5</item>
+        <item>6</item>
+        <item>50</item>
+        <item>100</item>
+        <item>500</item>
+        <item>1500</item>
+        <item>3000</item>
+        <item>4999</item>
+        <item>5000</item>
+        <item>19999</item>
+        <item>20000</item>
+    </integer-array>
+    <integer-array name="config_autoBrightnessLcdBacklightValues">
+        <item>2</item>
+        <item>6</item>
+        <item>6</item>
+        <item>11</item>
+        <item>79</item>
+        <item>95</item>
+        <item>141</item>
+        <item>183</item>
+        <item>200</item>
+        <item>219</item>
+        <item>255</item>
+        <item>255</item>
+        <item>255</item>
+    </integer-array>
+
+    <!-- Doze / always-on display: off.  Stock: config_dozeAlwaysOnDisplayAvailable false (FR :390570),
+         config_dozeAfterScreenOffByDefault false (FR :390567); stock's config_dozeComponent is
+         com.android.systemui/com.android.systemui.doze.DozeService (FR :85642), left empty here so no
+         ambient display runs, as requested. -->
+    <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
+    <bool name="config_dozeAfterScreenOffByDefault">false</bool>
+    <string name="config_dozeComponent" translatable="false"></string>
+
+    <!-- Telephony: two physical SIM slots, RRO :58-59. -->
+    <integer name="config_num_physical_slots">2</integer>
+    <!-- VoLTE on the device side, RRO :12-13 (AOSP default false, fw/base 5c05c66e config.xml:3804). Read by
+         ImsManager.isVolteEnabledByPlatform() together with carrier_volte_available_bool (docs/IMS_1001.md §1).
+         Inert without android.hardware.telephony.ims, which ships only with PhhIms (device.mk IMS block). -->
+    <bool name="config_device_volte_available">true</bool>
+
+    <!-- Fingerprint (under-display, optical): the HAL reports Type 3 with no location, so SystemUI's sensor rect
+         is 0,0-0,0 (docs/FINGERPRINT_1001.md §6). On the AIDL path the only overlay that sets the location is
+         config_sfps_sensor_props: it replaces the HAL's locations, the type stays the HAL's
+         (fw/base 5c05c66e services/.../fingerprint/aidl/Sensor.java:229, FingerprintProvider.java:948-983).
+         Items: displayId ("" = default display), x, y, radius in px.
+         Source: the stock driver's /sys/class/fingerprint/fingerprint/position (device-tree goodix,position)
+         = 12.34,0.00,9.10,9.10,14.80,14.80,12.00,12.00,5.00 (docs/logs/fp_1001/4_sysfs_fp.txt), converted with
+         phhusson/platform_frameworks_base 4f160de9 AuthService.java:917-936 (bottom = field 0, area = field 5, mm to px
+         with yDpi 388.47058 from docs/logs/fp_1001/5_display_props.txt, panel 1080 x 2340):
+         bottom 188 px, area 226 px, radius 226/2 = 113, x = 1080/2 = 540, y = 2340 - 188 - 113 = 2039. -->
+    <array name="config_sfps_sensor_props" translatable="false">
+        <item>@array/config_essi_udfps_location_display0</item>
+    </array>
+    <array name="config_essi_udfps_location_display0" translatable="false">
+        <item>@null</item>
+        <item>540</item>
+        <item>2039</item>
+        <item>113</item>
+    </array>
+</resources>

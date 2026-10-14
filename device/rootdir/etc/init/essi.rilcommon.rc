@@ -1,0 +1,29 @@
+# ro.boot.* -> ro.vendor.boot.* for the vendor RIL (docs/CSC_0927.md section 3).
+# Copied from stock /system/etc/init/init.rilcommon.rc (reference/stock/extra/csc/system/system/etc/init/
+# init.rilcommon.rc:68-81 and 89-90): a Samsung *system* script, absent from our Lineage system. rild reads the
+# ro.vendor.boot. names ("Not support read boot param (ro.vendor.boot.carrierid.param.offset)", 19x on 27/09,
+# while ro.boot.carrierid.param.offset is set). Only the six *.param.offset lines: stock's other mappings in the
+# same block (debug_level, cp_debug_level, warranty_bit, force_upload, ...) change modem debug/upload behaviour
+# and no log shows them read.
+# SELinux: source ro.boot.* = bootloader_prop, readable by every domain (system/sepolicy private/domain.te:479);
+# target ro.vendor.* = vendor_default_prop (private/property_contexts:266; stock has no finer label either,
+# reference/stock/vendor/etc/selinux/vendor_property_contexts), which vendor_init may set (private/vendor_init.te:305)
+# and every vendor domain may read (private/domain.te:471).
+
+on property:ro.boot.sales.param.offset=*
+    setprop ro.vendor.boot.sales.param.offset ${ro.boot.sales.param.offset}
+
+on property:ro.boot.carrierid.param.offset=*
+    setprop ro.vendor.boot.carrierid.param.offset ${ro.boot.carrierid.param.offset}
+
+on property:ro.boot.im.param.offset=*
+    setprop ro.vendor.boot.im.param.offset ${ro.boot.im.param.offset}
+
+on property:ro.boot.me.param.offset=*
+    setprop ro.vendor.boot.me.param.offset ${ro.boot.me.param.offset}
+
+on property:ro.boot.omcnw.param.offset=*
+    setprop ro.vendor.boot.omcnw.param.offset ${ro.boot.omcnw.param.offset}
+
+on property:ro.boot.sn.param.offset=*
+    setprop ro.vendor.boot.sn.param.offset ${ro.boot.sn.param.offset}
