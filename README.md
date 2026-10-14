@@ -36,7 +36,8 @@ This repository has four parts:
 ## No Samsung files in git
 
 The repository contains no Samsung binaries. Kernel, modules, ramdisk files and vendor blobs are extracted from
-**your own copy** of the stock A566BXXS6AYGE firmware. The one Samsung-derived part that is committed is the
+**your own copy** of the stock A566BXXS6AYGE firmware. [`docs/REPRODUCE.md`](docs/REPRODUCE.md) lists the exact
+firmware file, which image each step needs, and checksums to confirm a match. The one Samsung-derived part that is committed is the
 generated vendor policy in `device/sepolicy/vendor/` (see step 3). See [`NOTICE`](NOTICE).
 
 ### 1. Prebuilts (kernel, dtb, dtbo, modules, vendor_boot ramdisk files)

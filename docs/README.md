@@ -1,7 +1,7 @@
 # docs/
 
 The investigation notes behind the device tree and the SELinux policy, kept as they were written, in date order
-(`MMDD` in the file name, 2026). Start with `APPROACH.md`, `KNOWN_GAPS.md`, `RESULTS.md` and
+(`MMDD` in the file name, 2026). Start with `REPRODUCE.md`, `APPROACH.md`, `KNOWN_GAPS.md`, `RESULTS.md` and
 `UNVERIFIED_WORK.md`.
 
 **About citations.** The notes often cite raw evidence:
@@ -38,6 +38,7 @@ Identifiers that remained in the notes are masked (`XX:XX:XX:XX:XX:XX`, `<ims-pd
 | [`MODEM_0927.md`](MODEM_0927.md) | 27/09 (night): modem registration, then polish |
 | [`NETWORK_MODE_1001.md`](NETWORK_MODE_1001.md) | Modem network mode (01/10) |
 | [`OBSERVATION_0929.md`](OBSERVATION_0929.md) | Observation of 29/09 (cleaned) |
+| [`REPRODUCE.md`](REPRODUCE.md) | Reproducing the work: exact files needed |
 | [`RESULTS.md`](RESULTS.md) | Acceptance check results |
 | [`SCREEN_0927.md`](SCREEN_0927.md) | Screen edges: the stock product overlay (27/09, night) |
 | [`SEHRADIO_0928.md`](SEHRADIO_0928.md) | sehradiomanager (framework-ready client): on hold, 28/09 |
