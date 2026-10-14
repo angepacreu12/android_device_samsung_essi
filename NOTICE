@@ -23,6 +23,12 @@ Third-party material
     from krazey/ims and phhusson/ims). Patches 0001 and 0002 are upstream commits by krazey <admin@krazey.de>,
     with the original authorship kept in their headers. These patch files are GPL-2.0, not Apache-2.0.
 
+- Samsung vendor SELinux policy (generated)
+  - device/sepolicy/vendor/ is produced by tools/cil2te.py from the vendor policy (vendor_sepolicy.cil and
+    contexts) of the stock A566BXXS6AYGE firmware. It is a mechanical conversion of Samsung's policy,
+    included for interoperability so the stock vendor binaries run under SELinux; it is not covered by this
+    repository's Apache-2.0 grant beyond what the author can grant. tools/cil2te.py regenerates it.
+
 - Samsung / Exynos configuration text
   - device/rootdir/ (fstab, wifi.rc, recovery init scripts), device/configs/audio/ and parts of
     device/manifest.xml are modified versions of configuration files from the stock A566BXXS6AYGE firmware.
@@ -33,12 +39,12 @@ Third-party material
 What this repository does NOT contain
 -------------------------------------
 
-No Samsung binaries and no Samsung-derived SELinux policy:
+No Samsung binaries and no stock firmware files:
 - kernel, dtb, dtbo, kernel modules (.ko), vendor_boot ramdisk firmware, binaries and configuration: extracted locally from
   your own firmware with tools/extract_prebuilts.sh into the gitignored device/prebuilts/.
 - vendor blobs: extracted locally with device/extract-files.py into vendor/samsung/essi (separate tree).
-- device/sepolicy/vendor/: generated locally by tools/cil2te.py from your own firmware's vendor policy
-  (reference/stock/, filled by tools/populate_reference.sh). Both directories are gitignored.
+- reference/stock/ (the stock firmware's SELinux, init and VINTF files): filled locally by
+  tools/populate_reference.sh. It is gitignored.
 
 "Samsung", "Galaxy" and "Exynos" are trademarks of Samsung Electronics Co., Ltd. This project is not affiliated
 with or endorsed by Samsung.

@@ -23,7 +23,7 @@ This repository has four parts:
 |---|---|
 | `device/` | the device tree; goes to `device/samsung/essi` in the source tree |
 | `device/sepolicy_extra/`, `device/sepolicy_system_ext/` | hand-written vendor and system_ext SELinux policy |
-| `device/sepolicy/vendor/` | **generated, not in git**: Samsung's stock vendor policy turned into `.te`/contexts by `tools/cil2te.py` |
+| `device/sepolicy/vendor/` | **generated**: Samsung's stock vendor policy converted to `.te`/contexts by `tools/cil2te.py` (committed; do not edit by hand) |
 | `device/prebuilts/` | **not in git**: kernel, dtb, dtbo, modules, ramdisk firmware and files (`tools/extract_prebuilts.sh`). Only the module lists (`modules.load`, `modules.blocklist`, `modules.list`) are tracked |
 | `device/fingerprint/`, `device/audio_bt/`, `device/shims/`, `device/bootlog/` | HALs and helpers built from source |
 | `tools/` | the policy converter and the four acceptance checks; see [`tools/README.md`](tools/README.md) |
@@ -35,8 +35,9 @@ This repository has four parts:
 
 ## No Samsung files in git
 
-The repository contains no Samsung binaries and no Samsung-derived policy. Everything Samsung's is extracted
-from **your own copy** of the stock A566BXXS6AYGE firmware. See [`NOTICE`](NOTICE).
+The repository contains no Samsung binaries. Kernel, modules, ramdisk files and vendor blobs are extracted from
+**your own copy** of the stock A566BXXS6AYGE firmware. The one Samsung-derived part that is committed is the
+generated vendor policy in `device/sepolicy/vendor/` (see step 3). See [`NOTICE`](NOTICE).
 
 ### 1. Prebuilts (kernel, dtb, dtbo, modules, vendor_boot ramdisk files)
 
@@ -64,6 +65,13 @@ device/extract-files.py <dump of the stock partitions>
 
 ### 3. Vendor SELinux policy
 
+The vendor policy is in two parts, both committed:
+- `device/sepolicy/vendor/`: generated from Samsung's A566BXXS6AYGE vendor policy. It is ready to build; you only
+  need to regenerate it for another firmware version or after changing `tools/cil2te.py` or its exclusions.
+- `device/sepolicy_extra/` and `device/sepolicy_system_ext/`: written by hand, for what the conversion cannot
+  carry over (the runtime denials, the system_ext types).
+
+To regenerate the generated part:
 1. Mount the stock `vendor`, `odm` and `system` images read-only (the label listings need a mount).
 2. Fill `reference/stock/` and regenerate the policy:
 
@@ -125,5 +133,6 @@ The open items and the work that was written but not merged are in
 
 ## License
 
-Apache-2.0 ([`LICENSE`](LICENSE)), except the PhhIms patches (GPL-2.0) and the third-party files listed in
+Apache-2.0 ([`LICENSE`](LICENSE)), except the PhhIms patches (GPL-2.0), the generated Samsung-derived vendor
+policy (`device/sepolicy/vendor/`) and the third-party files listed in
 [`NOTICE`](NOTICE). This project is not affiliated with or endorsed by Samsung.
