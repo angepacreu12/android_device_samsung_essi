@@ -17,6 +17,64 @@ This repository has four parts:
 > **Status: work in progress, for developers.** It boots and the main hardware works (see below). Read
 > [`docs/UNVERIFIED_WORK.md`](docs/UNVERIFIED_WORK.md) before you flash anything.
 
+## Highlights
+
+Problems found and fixed on the real phone. Each links to the analysis.
+
+1. **Our own vendor SELinux policy, from Samsung's compiled one.**
+   - The first image booted with almost no vendor policy: 1,486 lines of CIL against stock's 20,227.
+   - `tools/cil2te.py` converts Samsung's `vendor_sepolicy.cil` into buildable `.te` and contexts files: 1,116
+     types, about 12,700 rules, 1,428 of 1,610 file contexts.
+   - It drops the ~4,200 rules that name Samsung-only platform types.
+   - Four checks compare the result with stock: compile and neverallows, the label of every vendor file, an init
+     transition for every service, and VINTF coverage.
+   - [`APPROACH.md`](docs/APPROACH.md), [`KNOWN_GAPS.md`](docs/KNOWN_GAPS.md)
+2. **Boot hangs traced to one missing label and one missing init script.**
+   - `tzdaemon` labelled `vendor_file` stopped the TEE at `post-fs`.
+   - Later, KeyMint never started because its `.rc` wasn't shipped, so `vold` waited forever for the encryption key.
+   - [`KNOWN_GAPS.md`](docs/KNOWN_GAPS.md) §4
+3. **Samsung's hardware video codec service crashing on its first codec.**
+   - A newer AOSP added a member to `ComponentStore`, but Samsung's prebuilt service allocates the old size.
+   - A 4-header patch restores the layout.
+   - [`CODEC2_1001.md`](docs/CODEC2_1001.md)
+4. **5G stripped before it reached the modem.**
+   - The RIL reports a radio capability without NR, so Android masked every network type down to LTE/WCDMA.
+   - A telephony patch keeps NR in the mask, and the phone registers on 5G.
+   - [`NETWORK_MODE_1001.md`](docs/NETWORK_MODE_1001.md)
+5. **VoLTE with an open-source IMS stack** (PhhIms) instead of Samsung's proprietary one.
+   - Covers the IMS APN, registration over 4G/5G, calls, and two upstream fixes for downlink audio underruns.
+   - [`IMS_0928.md`](docs/IMS_0928.md), [`IMS_1001.md`](docs/IMS_1001.md)
+6. **Under-display fingerprint and camera.**
+   - Swapped in LineageOS's Samsung fingerprint HAL, with the sensor position from the stock driver.
+   - Shimmed `ALooper_forCamera` so Samsung's camera provider stops crash-looping.
+   - [`FINGERPRINT_1001.md`](docs/FINGERPRINT_1001.md), [`CAMERA_1001.md`](docs/CAMERA_1001.md)
+
+## How this was built
+
+This is AI-assisted work, made with [Claude Code](https://claude.com/claude-code). Commits carry a
+`Co-Authored-By: Claude` line.
+
+- **Claude:** most of the analysis, code and documentation.
+- **Me (dxjsk):**
+  - setting goals and priorities, and making the calls (network mode, Wi-Fi calling, what to leave out);
+  - building, flashing and recovering the phone;
+  - capturing logs and testing on the real device;
+  - judging results, and deciding what was good enough.
+
+What I learned:
+- the Android build system;
+- SELinux (CIL, neverallows, contexts);
+- VINTF and HALs;
+- IMS/VoLTE;
+- the device bring-up loop: build, flash, capture, analyse, fix.
+
+> **Résumé (FR).** Portage d'/e/OS (LineageOS 22.2, Android 15) sur le Samsung Galaxy A56 5G (Exynos 1580) :
+> arbre de périphérique, politique SELinux vendor générée depuis celle de Samsung (outil de conversion et quatre
+> contrôles automatiques), correctifs plateforme (codec vidéo, 5G, VoLTE avec une pile IMS libre). Réalisé avec
+> Claude Code. Claude a mené l'essentiel de l'analyse, du code et de la documentation. J'ai fixé les objectifs et
+> les priorités, pris les décisions, compilé, flashé et récupéré le téléphone, capturé les journaux, testé sur
+> l'appareil et validé les résultats.
+
 ## Layout
 
 | path | what |

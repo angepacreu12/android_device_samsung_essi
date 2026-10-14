@@ -9,7 +9,7 @@ The investigation notes behind the device tree and the SELinux policy, kept as t
 - task notes (`TASK_*.md`);
 - the stock firmware (`reference/stock/...`) and our built image (`reference/ours/...`).
 
-None of these are published. The captures contain device identifiers (IMEI, serial number, network addresses,
+None of these are published; [`HISTORY.md`](HISTORY.md) says what each `PR #NN`, `PR A-D` and `TASK_*.md` was. The captures contain device identifiers (IMEI, serial number, network addresses,
 cell IDs), and the firmware files are Samsung's. `reference/stock` and `reference/ours` can be rebuilt locally
 (see the top-level `README.md`). The line numbers cited for them refer to the A566BXXS6AYGE firmware. The
 captures are not available.
@@ -29,6 +29,7 @@ Identifiers that remained in the notes are masked (`XX:XX:XX:XX:XX:XX`, `<ims-pd
 | [`CODEC2_1001.md`](CODEC2_1001.md) | Codec2 01/10: `samsung.hardware.media.c2@V1-service` crashes on its first codec |
 | [`CSC_0927.md`](CSC_0927.md) | CSC/OMC config for the modem (27/09, late night) |
 | [`FINGERPRINT_1001.md`](FINGERPRINT_1001.md) | Fingerprint (under-display): where the sensor geometry comes from (01/10, PR D) |
+| [`HISTORY.md`](HISTORY.md) | Key for the `PR #NN`, `PR A-D` and `TASK_*.md` citations |
 | [`IMAGE_GAPS.md`](IMAGE_GAPS.md) | Stock vendor services missing from our vendor image |
 | [`IMS_0928.md`](IMS_0928.md) | IMS (VoLTE, then VoWiFi) with an open-source stack: feasibility, 28/09 |
 | [`IMS_1001.md`](IMS_1001.md) | IMS follow-up (01/10): VoLTE switch, Wi-Fi calling, RCS, user-agent, audio underruns |

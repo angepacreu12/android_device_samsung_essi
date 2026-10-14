@@ -102,7 +102,8 @@ PRODUCT_ENFORCE_RRO_TARGETS := *
 # projects.txt, not by the manifest). PhhImsOverlay (config_ims_mmtel_package=me.phh.ims) comes with PhhIms through
 # its `required` (Android.bp:28). VoLTE availability (docs/IMS_1001.md §1): CarrierConfigOverlayEssi sets
 # carrier_volte_available_bool for Free 208/15; the device half, config_device_volte_available, is in the overlay.
-# Wi-Fi calling (docs/IMS_1001.md §2) also needs QualifiedNetworksService, added by projects.txt. With it, the image
+# Wi-Fi calling (docs/IMS_1001.md §2) also needs QualifiedNetworksService checked out at
+# packages/services/QualifiedNetworksService (not in projects.txt: AOSP has no Android 15 tag for it). With it, the image
 # gets Iwlan (Lineage manifest default.xml:808), QNS, overlay-wfc and the carrier config variant with the WFC keys
 # (two overlays of the same vendor.xml replace each other, so exactly one of the two is installed).
 ifneq ($(wildcard packages/apps/PhhIms/Android.bp),)
