@@ -46,5 +46,5 @@ No Samsung binaries and no stock firmware files:
 - reference/stock/ (the stock firmware's SELinux, init and VINTF files): filled locally by
   tools/populate_reference.sh. It is gitignored.
 
-"Samsung", "Galaxy" and "Exynos" are trademarks of Samsung Electronics Co., Ltd. This project is not affiliated
-with or endorsed by Samsung.
+"Samsung", "Galaxy" and "Exynos" are trademarks of Samsung Electronics Co., Ltd. This is a personal project,
+not affiliated with or endorsed by Samsung, Epitech, LineageOS or /e/OS (Murena).

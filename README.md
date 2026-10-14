@@ -21,6 +21,9 @@
 > to any content here and want it removed (DMCA or similar), email **ange.pacreu@epitech.eu**. Name the files
 > concerned and the basis of the claim; I will review and act promptly. You can also use
 > [GitHub's DMCA process](https://docs.github.com/en/site-policy/content-removal-policies/dmca-takedown-policy).
+>
+> **No affiliation.** This is a personal project. It is not affiliated with, endorsed by or carried out on behalf
+> of Epitech, Samsung, LineageOS or /e/OS (Murena). The Epitech address above is only a contact address.
 
 This repository has four parts:
 
@@ -215,4 +218,4 @@ The open items and the work that was written but not merged are in
 
 Apache-2.0 ([`LICENSE`](LICENSE)), except the PhhIms patches (GPL-2.0), the generated Samsung-derived vendor
 policy (`device/sepolicy/vendor/`) and the third-party files listed in
-[`NOTICE`](NOTICE). This project is not affiliated with or endorsed by Samsung.
+[`NOTICE`](NOTICE). This is a personal project, not affiliated with or endorsed by Samsung or Epitech.
