@@ -1,0 +1,6 @@
+# check 3: stock services whose binary is in our vendor image while their init script is deliberately not.
+# One `service_name<TAB>reason` per line.  They are reported as n/a instead of FAIL; anything not listed here
+# that has a binary without its .rc is still a failure (that is how the KeyMint .rc omission was found).
+cass	relock vector: CASS kept out on purpose (cass.rc not shipped; docs/IMAGE_GAPS.md)
+vaultkeeper	relock vector: VaultKeeper kept out on purpose (vaultkeeper_common.rc not shipped)
+vaultkeeper_aidl	relock vector: VaultKeeper AIDL service kept out on purpose (same .rc)

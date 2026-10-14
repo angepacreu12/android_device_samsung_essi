@@ -1,0 +1,7 @@
+/vendor/bin/essi_bootlog\.sh    u:object_r:essi_bootlog_exec:s0
+# AOSP Bluetooth audio module + provider (device/audio_bt). Same domain as AOSP's AIDL audio HAL example
+# (reference/ours/vendor/etc/selinux/vendor_file_contexts:275) and stock secaudiohalaidl (:1538).
+/vendor/bin/hw/android\.hardware\.audio\.service-aidl\.essi-bt    u:object_r:hal_audio_default_exec:s0
+# LineageOS Samsung fingerprint HAL (device.mk Fingerprint). Same domain as the stock binary it replaces
+# (device/sepolicy/vendor/file_contexts:218) and as LineageOS sm7125-common b315034e sepolicy/vendor/file_contexts:61.
+/vendor/bin/hw/android\.hardware\.biometrics\.fingerprint-service\.samsung    u:object_r:hal_fingerprint_default_exec:s0

@@ -1,0 +1,7 @@
+# Hand-written vendor property labels (second BOARD_VENDOR_SEPOLICY_DIRS entry; device/sepolicy/vendor/ is generated).
+# vendor.bluetooth_fw_ver: set by hal_bluetooth_default (15 denials, 27/09 boot #3, docs/BOOT_0927_3_evidence.txt:119).
+# Stock has no entry for it either (reference/stock/vendor/etc/selinux/vendor_property_contexts: its only
+# bluetooth entries are lines 306 and 313), so on stock it is vendor_default_prop too, which hal_bluetooth_default
+# may not set (stock CIL sets: wifi_log_prop 7771, vendor_bluetooth_prop 11932, sec_bluetooth_prop 11941,
+# vendor_bdroid_service_prop 11959). Same type as stock's other vendor.bluetooth_* entry (:306).
+vendor.bluetooth_fw_ver    u:object_r:vendor_bluetooth_prop:s0

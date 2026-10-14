@@ -1,0 +1,5 @@
+# audioserver looks this service up (libaudiohal, ro.audio.ihaladaptervendorextension_enabled:
+# reference/system/system/selinux/plat_property_contexts:511) and the stock audio HAL registers it.
+# Neither our plat_service_contexts nor the stock vendor_service_contexts names it (stock labels its
+# other audio AIDL services hal_audio_service at lines 51 and 95), so it resolved to
+# default_android_service, which audioserver may not find (58 denials on the 27/09 boot).

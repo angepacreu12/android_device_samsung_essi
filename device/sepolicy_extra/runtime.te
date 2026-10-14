@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2026 dxjsk
+# SPDX-License-Identifier: Apache-2.0
+
+# Hand-written rules for the enforced denials of the 27/09 boot (logcat + dmesg from essi_bootlog).
+# This directory is the second BOARD_VENDOR_SEPOLICY_DIRS entry; device/sepolicy/vendor/ is generated
+# and must not be edited.  Line numbers below refer to reference/stock/vendor/etc/selinux/vendor_sepolicy.cil
+# ("stock CIL") unless another file is named.  "no stock rule" means the stock policy denies the same
+# access too.  The denials that an AOSP neverallow forbids (hal_graphics_composer_default -> system_prop,
+# hal_audio_default -> radio_prop, hal_hyper_default -> default_prop, emservice -> default_prop) have
+# no rule here: see docs/KNOWN_GAPS.md section 4.
+
+# ---- epicd (15 + 15 denials; the daemon aborts with "terminating" every 5 s) -----------------------
+# write /sys/devices/platform/ems/emstune/req_level.  genfscon labels it sysfs_ss_writable (stock
+# CIL 900, copied to device/sepolicy/vendor/genfs_contexts:901).  Stock grants epicd the same node only
+# under the label its file_contexts would give /sys/kernel/ems/emstune/req_level, ems_file
+# (vendor_file_contexts:1520; rule CIL 5271 "read write getattr open"), and plain sysfs (CIL 5275).
+# No stock rule on sysfs_ss_writable for epicd.  Same permission set as CIL 5271.
+allow epicd sysfs_ss_writable:file { read write getattr open };
+# read vendor.epic.log.  The mapping and the type are the stock ones (property_contexts:38 = stock
+# vendor_property_contexts:94, vendor_epic_prop declared in property.te:21).  No stock rule: stock lets
+# only system_server read it (CIL 6691) and vendor_init set/read it (CIL 6854-6855).
+get_prop(epicd, vendor_epic_prop)
+
+# ---- hal_hyper_default (14 denials) ---------------------------------------------------------------
+# write req_level and low_latency under /sys/devices/platform/ems/emstune (sysfs_ss_writable, stock
+# CIL 900 and 859).  Stock grants the hyper HAL the ems nodes as ems_file (CIL 19307, rw_file_perms)
+# and sysfs_vendor_ems (CIL 19315); no stock rule on sysfs_ss_writable.  Same permission set as 19307.
+allow hal_hyper_default sysfs_ss_writable:file rw_file_perms;
+
+# ---- hal_graphics_composer_default (29 denials): NO RULE ------------------------------------------
+# read persist.sys.sf.hs_mode.  No contexts file names it; it falls under "persist.sys." ->
+# system_prop (reference/system/system/selinux/plat_property_contexts:103, stock
+# reference/stock/system/plat_property_contexts:102).  system_prop is core_property_type
+# (private/property.te:147) and "neverallow { domain -coredomain -appdomain -vendor_init }
+# core_property_type:file no_rw_file_perms" (private/property.te:287-305, inside compatible_property_only) forbids the read from a
+# vendor domain; check 1 rejects the rule.  Stock has no composer rule on system_prop either
+# (its property rules are CIL 5686-5691 and 8015-8047), so Samsung's system side labels the
+# property differently.  Alternative: see docs/KNOWN_GAPS.md section 4.
+
+# ---- hal_health_default (7) and hal_thermal_default (6) --------------------------------------------
+# read sys.boot_completed -> boot_status_prop (plat_property_contexts:949; stock :889).
+# system_restricted_prop (public/property.te:60): readable by vendor, settable by system_server only
+# (private/system_server.te:1607 neverallow on set).  No stock rule for these two domains; stock grants
+# the same read to cbd (CIL 18983), and hal_thermal_default reads exported_system_prop (CIL 13632).
+get_prop(hal_health_default, boot_status_prop)
+get_prop(hal_thermal_default, boot_status_prop)
+
+# ---- hal_gnss_default (69 denials) ----------------------------------------------------------------
+# read /dev/umts_boot0 -> sec_radio_device (vendor_file_contexts:1260 = ours file_contexts:1079).
+# No stock rule for hal_gnss_default on sec_radio_device (its device rules are CIL 4477, 5644, 5648);
+# stock grants the node rw to the older gpsd domain (CIL 11761) and to the modem daemons (cbd 18978,
+# rild 8996).  Read-only here; drop this block if GNSS is not wanted to touch the modem boot node.
+allow hal_gnss_default sec_radio_device:chr_file r_file_perms;
+
+# ---- gperfd (4 denials) ---------------------------------------------------------------------------
+# write /dev/socket/traced_producer: the first step of a Perfetto producer connecting to traced.
+# No stock rule for gperfd (its rules are CIL 5323-5341); stock uses this macro's rules for
+# hal_camera_default (CIL 12024) and mediacodec (CIL 14822).  perfetto_producer() is the AOSP macro
+# (public/te_macros:873).  Only tracing depends on it.
+perfetto_producer(gperfd)
+
+# ---- 27/09 boot #3 (docs/BOOT_0927_3_evidence.txt:118): hal_hyper_default (25 denials): NO RULE -------------
+# setsched on permissioncontroller_app processes.  Stock has no rule for this pair (Samsung's CIL has no
+# permissioncontroller_app type) but grants the same permission to every other app domain (stock CIL
+# 12666-12680: untrusted_app_all, isolated_app, platform_app, system_app, gmscore_app, priv_app, ...).
+# The rule cannot be written here: permissioncontroller_app is a *private* platform type (Lineage 22.2
+# system/sepolicy/private/permissioncontroller_app.te), not exported to vendor policy; check 1 fails with
+# "unknown type permissioncontroller_app".  See docs/BOOT_0927_3.md section 6.
+
+# ---- 27/09 night, modem (docs/TASK_0927_modem.md, docs/MODEM_0927.md) ------------------------------------
+# rild sets/reads persist.ril.* (3 set denials, 90 default_prop reads).  Stock: rild -> rild_prop set + read
+# (CIL 19609-19610).  rild_prop is a Samsung system-side public type; ours is declared in
+# device/sepolicy_system_ext/public/property.te and mapped in device/sepolicy_system_ext/private/property_contexts.
+set_prop(rild, rild_prop)
+# vendor_secril_config_svc sets ro.multisim.simslotcount.  Stock: multisim_prop set + read (CIL 18375-18376),
+# the two secril rules the converter dropped (docs/KNOWN_GAPS.md section 1).  Same type mechanism as above.
+set_prop(vendor_secril_config_svc, multisim_prop)
+# vendor_secril_config_svc: search /mnt/vendor (3 denials; its config is /mnt/vendor/efs/factory.prop,
+# init.vendor.rilcommon.rc:28-31).  Stock rule: CIL 11140 "(allow base_typeattr_223_202404 mnt_vendor_file_202404
+# (dir (ioctl read getattr lock open watch watch_reads search)))" with base_typeattr_223 = (and (domain) (not
+# (coredomain))) (stock plat_pub_versioned.cil:7445), i.e. every vendor domain.  Converter loss: that set is
+# defined in the stock plat_pub_versioned.cil, not in the vendor CIL, and the 11 stock allow rules on such sets
+# were dropped (docs/MODEM_0927.md section 1b).  Same rule as stock; AOSP only forbids it to coredomain
+# (private/domain.te:1503-1510).
+allow { domain -coredomain } mnt_vendor_file:dir r_dir_perms;

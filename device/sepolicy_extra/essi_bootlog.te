@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 dxjsk
+# SPDX-License-Identifier: Apache-2.0
+
+# Boot log catcher. Permissive on debug builds only, so it needs (and grants) no allow rules of its own.
+type essi_bootlog, domain;
+type essi_bootlog_exec, exec_type, vendor_file_type, file_type;
+init_daemon_domain(essi_bootlog)
+userdebug_or_eng(`permissive essi_bootlog;')

@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 dxjsk
+# SPDX-License-Identifier: Apache-2.0
+
+# Device system_ext public policy (SYSTEM_EXT_PUBLIC_SEPOLICY_DIRS, device/BoardConfig.mk). Hand-written.
+#
+# Samsung labels the RIL daemons' system-side properties with public types of its *system* policy, so its
+# vendor domains may set them: stock reference/stock/vendor/etc/selinux/plat_pub_versioned.cil declares
+# rild_prop (:5465-5467) and multisim_prop (:5471-5473) and lists both in property_type (:54),
+# system_property_type (:60) and system_public_property_type (:69). Our platform has neither type, so the
+# same names fall to default_prop, which a vendor domain may never set or read (system/sepolicy
+# private/property.te:169-180). A vendor property_contexts cannot take persist.ril. or ro.multisim.
+# (build/soong/selinux_contexts.go:365-381); a system_ext one can, and vendor rules on system_public
+# types are allowed. Same macro Lineage uses for its own system_ext types (device/lineage/sepolicy/common/
+# public/property.te:2,5). See docs/MODEM_0927.md section 1a.
+system_public_prop(rild_prop)
+system_public_prop(multisim_prop)

@@ -1,0 +1,8 @@
+# Stock CIL statements that tools/cil2te.py must not convert.  One Python regex per line, matched
+# against the statement as printed in reference/stock/vendor/etc/selinux/vendor_sepolicy.cil.
+# Everything after '#' is the reason (shown in docs/cil2te_report.md).
+
+# Grants a platform domain (dumpstate) unrestricted dir ioctls on proc.  Our platform's
+# neverallowxperm * *:dir ioctl { 0 } (system/sepolicy/private/domain.te) rejects it at build time;
+# it has no effect on vendor daemons.
+^\(allow dumpstate_202404 proc_type \(dir \(.*\bioctl\b   # platform-to-platform dir ioctl, rejected by plat neverallowxperm

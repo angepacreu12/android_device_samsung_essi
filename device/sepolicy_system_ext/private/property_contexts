@@ -1,0 +1,12 @@
+# Device system_ext property contexts (SYSTEM_EXT_PRIVATE_SEPOLICY_DIRS). Built into
+# /system_ext/etc/selinux/system_ext_property_contexts (system/sepolicy contexts/Android.bp:241-246).
+# Only the RIL/secril properties the 27/09 evidence shows denied (docs/TASK_0927_modem.md:28-33); stock's
+# own system_ext_property_contexts is not in reference/stock, so the entry forms below (prefix for
+# persist.ril., one exact name for ro.multisim) are ours, the types are stock's.
+# rild sets persist.ril.cp_feature_type, persist.ril.supportNrModefromCp, persist.ril.esim.slotswitch
+# (stock: rild -> rild_prop set/read, vendor_sepolicy.cil:19609-19610). "ril." (plat_property_contexts:39)
+# does not cover the persist.ril. prefix.
+persist.ril.                u:object_r:rild_prop:s0
+# vendor_secril_config_svc (sim_config, init.vendor.rilcommon.rc:22-31) sets ro.multisim.simslotcount
+# (stock: multisim_prop set/read, vendor_sepolicy.cil:18375-18376; the two rules the converter dropped).
+ro.multisim.simslotcount    u:object_r:multisim_prop:s0
