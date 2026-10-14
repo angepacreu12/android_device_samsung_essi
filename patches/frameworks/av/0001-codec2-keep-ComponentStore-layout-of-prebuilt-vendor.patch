@@ -1,0 +1,188 @@
+From c32368f5c716999f77c64296fa7d12ef12380b87 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 1 Oct 2026 13:12:24 +0000
+Subject: [PATCH] codec2: keep ComponentStore layout of prebuilt vendor
+ services
+
+Upstream 07b6b1570b ("MultiAccessUnit reflector helper allocated once
+per ComponentStore", 2024-09-10) added the member
+mMultiAccessUnitReflector to the AIDL and HIDL ComponentStore classes.
+Vendor c2 services built before that change (Samsung SM-A566B,
+AP3A.240905.015) allocate ComponentStore with the old size, so the
+constructor in the platform-built library writes past the object and
+mComponentRoster, the last member, lies outside it: the first
+createComponent() crashes in reportComponentBirth().
+
+Keep the upstream behaviour (one reflector per store, pushed in the
+constructor) but drop the member: the reflector is the last one pushed,
+so tryCreateMultiAccessUnitInterface() takes mParamReflectors.back().
+---
+ media/codec2/hal/aidl/ComponentStore.cpp                    | 6 ++++--
+ media/codec2/hal/aidl/include/codec2/aidl/ComponentStore.h  | 3 ---
+ media/codec2/hal/hidl/1.0/utils/ComponentStore.cpp          | 6 ++++--
+ .../hidl/1.0/utils/include/codec2/hidl/1.0/ComponentStore.h | 3 ---
+ media/codec2/hal/hidl/1.1/utils/ComponentStore.cpp          | 6 ++++--
+ .../hidl/1.1/utils/include/codec2/hidl/1.1/ComponentStore.h | 3 ---
+ media/codec2/hal/hidl/1.2/utils/ComponentStore.cpp          | 6 ++++--
+ .../hidl/1.2/utils/include/codec2/hidl/1.2/ComponentStore.h | 3 ---
+ 8 files changed, 16 insertions(+), 20 deletions(-)
+
+diff --git a/media/codec2/hal/aidl/ComponentStore.cpp b/media/codec2/hal/aidl/ComponentStore.cpp
+index de9332b971..86a26655cf 100644
+--- a/media/codec2/hal/aidl/ComponentStore.cpp
++++ b/media/codec2/hal/aidl/ComponentStore.cpp
+@@ -157,8 +157,10 @@ ComponentStore::ComponentStore(const std::shared_ptr<C2ComponentStore>& store)
+     // All components in this store can reuse this reflector helper.
+     if (MultiAccessUnitHelper::isEnabledOnPlatform()) {
+         std::shared_ptr<C2ReflectorHelper> helper = std::make_shared<C2ReflectorHelper>();
++        // Keep this the last reflector pushed: tryCreateMultiAccessUnitInterface() finds it
++        // with mParamReflectors.back(). No member holds it, so that sizeof(ComponentStore)
++        // stays the one prebuilt vendor services were compiled against.
+         mParamReflectors.push_back(helper);
+-        mMultiAccessUnitReflector = helper;
+     }
+ 
+     // Retrieve supported parameters from store
+@@ -249,7 +251,7 @@ std::shared_ptr<MultiAccessUnitInterface> ComponentStore::tryCreateMultiAccessUn
+                 // thus we pass the component's param reflector, which is mParamReflectors[0].
+                 multiAccessUnitIntf = std::make_shared<MultiAccessUnitInterface>(
+                         c2interface,
+-                        mMultiAccessUnitReflector);
++                        std::static_pointer_cast<C2ReflectorHelper>(mParamReflectors.back()));
+             }
+         }
+     }
+diff --git a/media/codec2/hal/aidl/include/codec2/aidl/ComponentStore.h b/media/codec2/hal/aidl/include/codec2/aidl/ComponentStore.h
+index bb4c596cba..0e8ac41dce 100644
+--- a/media/codec2/hal/aidl/include/codec2/aidl/ComponentStore.h
++++ b/media/codec2/hal/aidl/include/codec2/aidl/ComponentStore.h
+@@ -127,9 +127,6 @@ protected:
+     std::shared_ptr<C2ComponentStore> mStore;
+     std::vector<std::shared_ptr<C2ParamReflector>> mParamReflectors;
+ 
+-    // Reflector helper for MultiAccessUnitHelper
+-    std::shared_ptr<C2ReflectorHelper> mMultiAccessUnitReflector;
+-
+     std::map<C2Param::CoreIndex, std::shared_ptr<C2StructDescriptor>> mStructDescriptors;
+     std::set<C2Param::CoreIndex> mUnsupportedStructDescriptors;
+     std::set<C2String> mLoadedInterfaces;
+diff --git a/media/codec2/hal/hidl/1.0/utils/ComponentStore.cpp b/media/codec2/hal/hidl/1.0/utils/ComponentStore.cpp
+index 108ba06129..852b290a5d 100644
+--- a/media/codec2/hal/hidl/1.0/utils/ComponentStore.cpp
++++ b/media/codec2/hal/hidl/1.0/utils/ComponentStore.cpp
+@@ -153,8 +153,10 @@ ComponentStore::ComponentStore(const std::shared_ptr<C2ComponentStore>& store)
+     // All components in this store can reuse this reflector helper.
+     if (MultiAccessUnitHelper::isEnabledOnPlatform()) {
+         std::shared_ptr<C2ReflectorHelper> helper = std::make_shared<C2ReflectorHelper>();
++        // Keep this the last reflector pushed: tryCreateMultiAccessUnitInterface() finds it
++        // with mParamReflectors.back(). No member holds it, so that sizeof(ComponentStore)
++        // stays the one prebuilt vendor services were compiled against.
+         mParamReflectors.push_back(helper);
+-        mMultiAccessUnitReflector = helper;
+     }
+ 
+     // Retrieve supported parameters from store
+@@ -241,7 +243,7 @@ std::shared_ptr<MultiAccessUnitInterface> ComponentStore::tryCreateMultiAccessUn
+             if (!isComponentSupportsLargeAudioFrame) {
+                 multiAccessUnitIntf = std::make_shared<MultiAccessUnitInterface>(
+                         c2interface,
+-                        mMultiAccessUnitReflector);
++                        std::static_pointer_cast<C2ReflectorHelper>(mParamReflectors.back()));
+             }
+         }
+     }
+diff --git a/media/codec2/hal/hidl/1.0/utils/include/codec2/hidl/1.0/ComponentStore.h b/media/codec2/hal/hidl/1.0/utils/include/codec2/hidl/1.0/ComponentStore.h
+index 028238bd24..07ffa219ec 100644
+--- a/media/codec2/hal/hidl/1.0/utils/include/codec2/hidl/1.0/ComponentStore.h
++++ b/media/codec2/hal/hidl/1.0/utils/include/codec2/hidl/1.0/ComponentStore.h
+@@ -131,9 +131,6 @@ protected:
+     std::shared_ptr<C2ComponentStore> mStore;
+     std::vector<std::shared_ptr<C2ParamReflector>> mParamReflectors;
+ 
+-    // Reflector helper for MultiAccessUnitHelper
+-    std::shared_ptr<C2ReflectorHelper> mMultiAccessUnitReflector;
+-
+     std::map<C2Param::CoreIndex, std::shared_ptr<C2StructDescriptor>> mStructDescriptors;
+     std::set<C2Param::CoreIndex> mUnsupportedStructDescriptors;
+     std::set<C2String> mLoadedInterfaces;
+diff --git a/media/codec2/hal/hidl/1.1/utils/ComponentStore.cpp b/media/codec2/hal/hidl/1.1/utils/ComponentStore.cpp
+index 84f5d260bd..b91013f08b 100644
+--- a/media/codec2/hal/hidl/1.1/utils/ComponentStore.cpp
++++ b/media/codec2/hal/hidl/1.1/utils/ComponentStore.cpp
+@@ -153,8 +153,10 @@ ComponentStore::ComponentStore(const std::shared_ptr<C2ComponentStore>& store)
+     // All components in this store can reuse this reflector helper.
+     if (MultiAccessUnitHelper::isEnabledOnPlatform()) {
+         std::shared_ptr<C2ReflectorHelper> helper = std::make_shared<C2ReflectorHelper>();
++        // Keep this the last reflector pushed: tryCreateMultiAccessUnitInterface() finds it
++        // with mParamReflectors.back(). No member holds it, so that sizeof(ComponentStore)
++        // stays the one prebuilt vendor services were compiled against.
+         mParamReflectors.push_back(helper);
+-        mMultiAccessUnitReflector = helper;
+     }
+ 
+     // Retrieve supported parameters from store
+@@ -241,7 +243,7 @@ std::shared_ptr<MultiAccessUnitInterface> ComponentStore::tryCreateMultiAccessUn
+             if (!isComponentSupportsLargeAudioFrame) {
+                 multiAccessUnitIntf = std::make_shared<MultiAccessUnitInterface>(
+                         c2interface,
+-                        mMultiAccessUnitReflector);
++                        std::static_pointer_cast<C2ReflectorHelper>(mParamReflectors.back()));
+             }
+         }
+     }
+diff --git a/media/codec2/hal/hidl/1.1/utils/include/codec2/hidl/1.1/ComponentStore.h b/media/codec2/hal/hidl/1.1/utils/include/codec2/hidl/1.1/ComponentStore.h
+index b0231151b3..5dcb359d4d 100644
+--- a/media/codec2/hal/hidl/1.1/utils/include/codec2/hidl/1.1/ComponentStore.h
++++ b/media/codec2/hal/hidl/1.1/utils/include/codec2/hidl/1.1/ComponentStore.h
+@@ -139,9 +139,6 @@ protected:
+     std::shared_ptr<C2ComponentStore> mStore;
+     std::vector<std::shared_ptr<C2ParamReflector>> mParamReflectors;
+ 
+-    // Reflector helper for MultiAccessUnitHelper
+-    std::shared_ptr<C2ReflectorHelper> mMultiAccessUnitReflector;
+-
+     std::map<C2Param::CoreIndex, std::shared_ptr<C2StructDescriptor>> mStructDescriptors;
+     std::set<C2Param::CoreIndex> mUnsupportedStructDescriptors;
+     std::set<C2String> mLoadedInterfaces;
+diff --git a/media/codec2/hal/hidl/1.2/utils/ComponentStore.cpp b/media/codec2/hal/hidl/1.2/utils/ComponentStore.cpp
+index 5585be8c6a..90744b987c 100644
+--- a/media/codec2/hal/hidl/1.2/utils/ComponentStore.cpp
++++ b/media/codec2/hal/hidl/1.2/utils/ComponentStore.cpp
+@@ -153,8 +153,10 @@ ComponentStore::ComponentStore(const std::shared_ptr<C2ComponentStore>& store)
+     // All components in this store can reuse this reflector helper.
+     if (MultiAccessUnitHelper::isEnabledOnPlatform()) {
+         std::shared_ptr<C2ReflectorHelper> helper = std::make_shared<C2ReflectorHelper>();
++        // Keep this the last reflector pushed: tryCreateMultiAccessUnitInterface() finds it
++        // with mParamReflectors.back(). No member holds it, so that sizeof(ComponentStore)
++        // stays the one prebuilt vendor services were compiled against.
+         mParamReflectors.push_back(helper);
+-        mMultiAccessUnitReflector = helper;
+     }
+ 
+     // Retrieve supported parameters from store
+@@ -241,7 +243,7 @@ std::shared_ptr<MultiAccessUnitInterface> ComponentStore::tryCreateMultiAccessUn
+             if (!isComponentSupportsLargeAudioFrame) {
+                 multiAccessUnitIntf = std::make_shared<MultiAccessUnitInterface>(
+                         c2interface,
+-                        mMultiAccessUnitReflector);
++                        std::static_pointer_cast<C2ReflectorHelper>(mParamReflectors.back()));
+             }
+         }
+     }
+diff --git a/media/codec2/hal/hidl/1.2/utils/include/codec2/hidl/1.2/ComponentStore.h b/media/codec2/hal/hidl/1.2/utils/include/codec2/hidl/1.2/ComponentStore.h
+index a7e043bc5f..16a524093c 100644
+--- a/media/codec2/hal/hidl/1.2/utils/include/codec2/hidl/1.2/ComponentStore.h
++++ b/media/codec2/hal/hidl/1.2/utils/include/codec2/hidl/1.2/ComponentStore.h
+@@ -146,9 +146,6 @@ protected:
+     std::shared_ptr<C2ComponentStore> mStore;
+     std::vector<std::shared_ptr<C2ParamReflector>> mParamReflectors;
+ 
+-    // Reflector helper for MultiAccessUnitHelper
+-    std::shared_ptr<C2ReflectorHelper> mMultiAccessUnitReflector;
+-
+     std::map<C2Param::CoreIndex, std::shared_ptr<C2StructDescriptor>> mStructDescriptors;
+     std::set<C2Param::CoreIndex> mUnsupportedStructDescriptors;
+     std::set<C2String> mLoadedInterfaces;
+-- 
+2.43.0
+

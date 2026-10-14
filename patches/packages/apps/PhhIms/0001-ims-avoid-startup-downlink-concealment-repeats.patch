@@ -1,0 +1,79 @@
+From 826c8d1f05e7d72438eafc479dfa2c07b6001fa9 Mon Sep 17 00:00:00 2001
+From: krazey <admin@krazey.de>
+Date: Fri, 3 Jul 2026 10:12:15 +0200
+Subject: [PATCH 1/2] ims: avoid startup downlink concealment repeats
+
+Downlink underrun concealment repeats an attenuated copy of the last
+good PCM frame for a few frames. That helps once playout is stable, but
+at call startup it can turn an unstable decoded PCM queue into repeated
+syllables until RTP timing settles.
+
+Keep playout latency unchanged, but do not enable last-frame
+concealment until a few consecutive real PCM frames have been played.
+Startup underruns fall back to silence instead, while the existing
+concealment behavior remains active after downlink playout is primed.
+
+Signed-off-by: krazey <admin@krazey.de>
+---
+ .../java/me/phh/sip/SipDownlinkPcmPlayout.kt  | 28 +++++++++++++++++--
+ 1 file changed, 26 insertions(+), 2 deletions(-)
+
+diff --git a/app/src/main/java/me/phh/sip/SipDownlinkPcmPlayout.kt b/app/src/main/java/me/phh/sip/SipDownlinkPcmPlayout.kt
+index 38c47eb..08ece10 100644
+--- a/app/src/main/java/me/phh/sip/SipDownlinkPcmPlayout.kt
++++ b/app/src/main/java/me/phh/sip/SipDownlinkPcmPlayout.kt
+@@ -10,6 +10,7 @@ import kotlin.concurrent.thread
+ 
+ object SipDownlinkPcmPlayout {
+     private const val DOWNLINK_UNDERRUN_CONCEALMENT_FRAMES = 6
++    private const val DOWNLINK_STARTUP_CONCEALMENT_PRIME_FRAMES = 4
+ 
+     private fun attenuatePcm16LeFrame(frame: ByteArray, gainShift: Int): ByteArray {
+         val out = ByteArray(frame.size)
+@@ -44,6 +45,8 @@ object SipDownlinkPcmPlayout {
+             }
+ 
+             var fillerFrames = 0
++            var startupConcealmentPrimed = false
++            var realFramesSinceLastUnderrun = 0
+             var lastGoodPcmFrame: ByteArray? = null
+             var nextWriteAtMs = SystemClock.elapsedRealtime() + 60L
+             Rlog.d(logTag, "Downlink PCM playout started: frameBytes=${buffers.frameBytes} codec=${audioCodec.name}/${audioCodec.sampleRate} gen=$generation")
+@@ -56,11 +59,32 @@ object SipDownlinkPcmPlayout {
+                     val queuedPcm = buffers.pcmQueue.poll()
+                     val pcm =
+                         if (queuedPcm != null) {
+-                            lastGoodPcmFrame = queuedPcm
++                            realFramesSinceLastUnderrun++
++                            if (
++                                !startupConcealmentPrimed &&
++                                    realFramesSinceLastUnderrun >=
++                                    DOWNLINK_STARTUP_CONCEALMENT_PRIME_FRAMES
++                            ) {
++                                startupConcealmentPrimed = true
++                                Rlog.d(
++                                    logTag,
++                                    "Downlink PCM playout startup concealment primed " +
++                                        "frames=$realFramesSinceLastUnderrun " +
++                                        "queued=${buffers.pcmQueue.size} gen=$generation",
++                                )
++                            }
++                            if (startupConcealmentPrimed) {
++                                lastGoodPcmFrame = queuedPcm
++                            }
+                             queuedPcm
+                         } else {
++                            realFramesSinceLastUnderrun = 0
+                             val last = lastGoodPcmFrame
+-                            if (last != null && fillerFrames < DOWNLINK_UNDERRUN_CONCEALMENT_FRAMES) {
++                            if (
++                                startupConcealmentPrimed &&
++                                    last != null &&
++                                    fillerFrames < DOWNLINK_UNDERRUN_CONCEALMENT_FRAMES
++                            ) {
+                                 attenuatePcm16LeFrame(
+                                     last,
+                                     gainShift = (fillerFrames + 2).coerceAtMost(8),
+-- 
+2.43.0
+

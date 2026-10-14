@@ -1,0 +1,37 @@
+From 8e7c2d441f7d8769e513fe4a38d13f57fd6cbde6 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 1 Oct 2026 15:39:27 +0000
+Subject: [PATCH] Phone: keep NR in the allowed network types sent to the modem
+
+The Samsung RIL on SM-A566B reports a radio capability without NR
+(GET_RADIO_CAPABILITY mRadioAccessFamily=130047) although its modem
+registers on NR. updateAllowedNetworkTypes() masks the effective allowed
+types with that capability, so every preferred type with NR reaches the
+modem as LTE/WCDMA (21380) and Phone info shows LTE/WCDMA.
+
+Add the NR bit to the modem capability before masking. NR still goes
+only when the effective allowed types hold it (user choice, carrier
+config, admin policy), so the other filters are unchanged.
+---
+ src/java/com/android/internal/telephony/Phone.java | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/java/com/android/internal/telephony/Phone.java b/src/java/com/android/internal/telephony/Phone.java
+index 0c645a0..7f6318e 100644
+--- a/src/java/com/android/internal/telephony/Phone.java
++++ b/src/java/com/android/internal/telephony/Phone.java
+@@ -2619,6 +2619,11 @@ public abstract class Phone extends Handler implements PhoneInternalInterface {
+             return;
+         }
+ 
++        // The Samsung RIL on this device reports a radio capability without NR (130047)
++        // although the modem registers on NR. Keep NR in the mask sent to the modem so
++        // that a preferred type with NR reaches it instead of being cut to LTE/WCDMA.
++        modemRaf |= (int) TelephonyManager.NETWORK_TYPE_BITMASK_NR;
++
+         int filteredRaf = (int) (modemRaf & getEffectiveAllowedNetworkTypes());
+ 
+         logd("setAllowedNetworkTypes: modemRafBitMask = " + modemRaf
+-- 
+2.43.0
+

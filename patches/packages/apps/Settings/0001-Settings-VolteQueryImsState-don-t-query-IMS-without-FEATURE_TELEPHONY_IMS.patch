@@ -1,0 +1,40 @@
+From 88e89250ff8583276e2711cb083dfffe4995606d Mon Sep 17 00:00:00 2001
+From: dxjsk <ange.pacreu@epitech.eu>
+Date: Mon, 28 Sep 2026 06:29:57 +0000
+Subject: [PATCH] Settings: VolteQueryImsState: don't query IMS without
+ FEATURE_TELEPHONY_IMS
+
+Enhanced4gBasePreferenceController registers its call-state callback
+whether or not the preference is available, and the callback calls
+updateState() -> isChecked() -> VolteQueryImsState.isEnabledByUser() ->
+ImsMmTelManager.isAdvancedCallingSettingEnabled(). On a device without
+android.hardware.telephony.ims and with ro.vendor.api_level >= 35,
+PhoneInterfaceManager throws UnsupportedOperationException and Settings
+crashes on the SIM page. Return false instead, as isVoImsOptInEnabled()
+already does.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .../android/settings/network/ims/VolteQueryImsState.java    | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/com/android/settings/network/ims/VolteQueryImsState.java b/src/com/android/settings/network/ims/VolteQueryImsState.java
+index 5acf2db..2798a5e 100644
+--- a/src/com/android/settings/network/ims/VolteQueryImsState.java
++++ b/src/com/android/settings/network/ims/VolteQueryImsState.java
+@@ -135,6 +135,12 @@ public class VolteQueryImsState extends ImsQueryController {
+         if (!SubscriptionManager.isValidSubscriptionId(mSubId)) {
+             return false;
+         }
++        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_TELEPHONY_IMS)) {
++            // Without FEATURE_TELEPHONY_IMS, ImsMmTelManager#isAdvancedCallingSettingEnabled()
++            // throws UnsupportedOperationException on devices whose vendor API level is V or
++            // later (same guard as isVoImsOptInEnabled() below).
++            return false;
++        }
+         return isEnabledByUser(mSubId);
+     }
+ 
+-- 
+2.43.0
+
