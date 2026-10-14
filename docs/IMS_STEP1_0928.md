@@ -2,7 +2,7 @@
 
 Plan: `docs/IMS_0928.md` §6, step 1.
 
-Ange's decisions (28/09):
+The tester's decisions (28/09):
 - The source is `xuanyayi/ims-for-wisdom`, branch `lineage-22.2`, pinned to a commit.
 - QualifiedNetworksService comes later, with Wi-Fi calling.
 - The project is added through the pipeline's `projects.txt` + `build.sh`, with no manifest change.
@@ -71,12 +71,12 @@ Ange's decisions (28/09):
   adb pull /product/etc/apns-conf.xml .
   grep -n -B8 -A8 'mnc="15"' apns-conf.xml | grep -B6 -A6 'mcc="208"' | grep -E 'carrier=|apn=|type='
   ```
-  **Result (Ange, 28/09): our build has Free's IMS APN**, the same as stock
+  **Result (the tester, 28/09): our build has Free's IMS APN**, the same as stock
   (`reference/stock/extra/csc/system/system/etc/apns-conf.xml:3636-3642`), in both lists the file carries:
   - `:1108` `mcc="208" mnc="15" carrier="IMS" apn="ims" protocol="IPV4V6" roaming_protocol="IPV4V6" type="ims"`
   - `:4389`, the same entry with `network_type_bitmask="1|…|20"` (all RATs)
   - `:4390` is a second `ims` entry restricted to `mvno_match_data="F003"` (the Iliad Italy SIMs, GID-matched), which
-    does not apply to Ange's SIM.
+    does not apply to the tester's SIM.
 
   So step 2 should reach `SETUP_DATA_CALL` for APN `ims`.
 - **Carrier config** (`docs/response_0928.md`):
@@ -92,7 +92,7 @@ Ange's decisions (28/09):
     `:32-68`).
   - So the loaded chain is `audio_policy_configuration_sec_on_gsi.xml`, which includes
     `primary_audio_policy_configuration_sec_on_gsi.xml` (`:25`).
-  - Ange pasted that primary module on 28/09. It is the one that declares exactly those ports: mix ports
+  - The tester pasted that primary module on 28/09. It is the one that declares exactly those ports: mix ports
     `incall_music_uplink` and `voice_tx`, and device ports `USB Device In`, `BLE Headset In`, `Telephony Tx` /
     `Telephony Rx` and `Echo-Reference In`. That confirms it is the live one.
 - **Audio route for an app-side call: present.**
@@ -104,7 +104,7 @@ Ange's decisions (28/09):
   - That is the path `MODE_IN_COMMUNICATION` should select, and PhhIms uses that mode (`docs/IMS_0928.md` §3).
   - No `voip` port exists (the dumpsys grep for `voip` is empty), so the app plays through the normal outputs.
     That is fine for 16 kHz AMR-WB.
-  - **The live primary module has the routes an app-side call needs** (from Ange's paste of
+  - **The live primary module has the routes an app-side call needs** (from the tester's paste of
     `primary_audio_policy_configuration_sec_on_gsi.xml`):
     - `<route type="mix" sink="Earpiece" sources="primary output, fast output, deep_buffer, Telephony Rx"/>`: the
       normal app outputs reach the earpiece, not only the modem's `Telephony Rx`. The earpiece port runs 48 kHz mono;

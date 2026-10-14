@@ -1,6 +1,6 @@
 # IMS PDN on the PR #24 build (28/09 evening)
 
-Evidence: `docs/ims_pdn_0928_grep.txt`. That is Ange's grep of the 18:25 capture, cited here as **G:N**; the number
+Evidence: `docs/ims_pdn_0928_grep.txt`. That is the tester's grep of the 18:25 capture, cited here as **G:N**; the number
 after `:` in each line of that file is the line in the full log. Lineage sources are pinned as in
 `docs/VERIFY_0928.md`.
 
@@ -79,7 +79,7 @@ after `:` in each line of that file is the line in the full log. Lineage sources
 
 ## 5. SMS
 
-Ange reports that SMS sends only in LTE mode, and replies never arrive in either mode. The grep has no SMS line, so
+The tester reports that SMS sends only in LTE mode, and replies never arrive in either mode. The grep has no SMS line, so
 nothing can be concluded yet:
 - In LTE mode without IMS, outgoing SMS goes over SGs, which worked on 28/09 (`docs/TASK_0928_call.md`).
 - In 3G-only mode on Free's own UMTS it should go over CS. The failure code is needed.

@@ -1,6 +1,6 @@
 # Modem network mode (01/10)
 
-Task: `docs/TASK_1001_multi(1).md`, section "Modem network mode (Ange's decision, 01/10)". Follows PR #26
+Task: `docs/TASK_1001_multi(1).md`, section "Modem network mode (the tester's decision, 01/10)". Follows PR #26
 (`docs/DIRECT_COMMITS_1001.md` §1). Upstream sources: LineageOS `android_frameworks_base` `5c05c66e` (L-fb) and
 `android_frameworks_opt_telephony` `6feb405d` (L-ot), the revisions PR #26 used.
 
@@ -24,7 +24,7 @@ The task's reasoning: master has 20 (`device/vendor.prop:130-131`), mode 20 has 
   - The prop-derived default (`RILConstants.PREFERRED_NETWORK_MODE` from `ro.telephony.default_network`, L-fb
     `RILConstants.java:256-259`) is used only for a reason with no stored value (`Phone.java:2418-2429`).
   - The 01/10 registry shows a stored "user" value (reason 0): `mAllowedNetworkTypeValue=130047`
-    (`04_telephony_registry.txt:34-35`). Ange set the mode by hand on 28/09 (`docs/DIRECT_COMMITS_1001.md` §1).
+    (`04_telephony_registry.txt:34-35`). The tester set the mode by hand on 28/09 (`docs/DIRECT_COMMITS_1001.md` §1).
 - **The framework-side values in the 01/10 capture don't show NR, but the modem reports data on NR.** The
   modem reports `getRilDataRadioTechnology=20(NR_SA)` (30×, first at `04_telephony_registry.txt:10`). Corrected in §6:
   the modem's report is what counts. Framework-side values:
@@ -52,13 +52,13 @@ Why 9 and not 33 or 26:
 - 20 is `NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA` (`RILConstants.java:214`). It has no source.
 - None of these values changes the live mode on this phone while a "user" value is stored for the SIM (§1).
 
-Ange chooses the final value (decision card in the project thread). This PR ships 9 until then.
+The tester chooses the final value (decision card in the project thread). This PR ships 9 until then.
 
 ## 3. How 5G is actually allowed
 
 5G is in use (§6). These are the conditions the framework applies:
 - **The "user" value must include NR.** Set in Settings, per SIM (preferred network type with 5G). It is the value
-  `getEffectiveAllowedNetworkTypes()` uses (§1). **Met after Ange's change at 13:24** (`logcatjsp.log:53`).
+  `getEffectiveAllowedNetworkTypes()` uses (§1). **Met after the tester's change at 13:24** (`logcatjsp.log:53`).
 - **The carrier must allow NR.** The framework strips NR when the carrier config's `carrier_nr_availabilities_int_array`
   is empty (L-ot `GsmCdmaPhone.java:5299-5303`, applied at `Phone.java:2361-2363`). The AOSP default is NSA + SA
   (L-fb `CarrierConfigManager.java:11162-11163`). **Met:** Free's config has `[1, 2]` (`docs/logs/fp_1001/logcatims.log:1`).
@@ -114,19 +114,19 @@ Mask the output as for the 01/10 logs (`docs/DIRECT_COMMITS_1001.md` §3, includ
 - **The stored values:** `user=130047` and `enable_2g=545668` (`:16`). Decoded (bit = network type − 1):
   - 130047: every 2G/3G/4G type, TD-SCDMA, CDMA and EvDo, **no NR**;
   - 545668: UMTS, HSxPA, LTE and NR, **no GSM/GPRS/EDGE**. The "Allow 2G" switch is off.
-- **After Ange picked a 5G mode,** the effective value gains NR: `…LTE|HSPA+|LTE_CA|NR` (`:53`). The stored user
+- **After the tester picked a 5G mode,** the effective value gains NR: `…LTE|HSPA+|LTE_CA|NR` (`:53`). The stored user
   value is then 654335, i.e. 130047 + NR (`:58-59`).
 - **The modem still gets no NR.** `modemRafBitMask = 130047` (no NR), so `filteredRafBitMask = 21380`: UMTS, HSxPA,
   LTE (`:54`). The modem confirms it with `GET_ALLOWED_NETWORK_TYPES_BITMAP {21380}` (`:51-52`).
 - **The `NR` label is unreliable here too.** `mTelephonyDisplayInfo` says `network=NR` while the serving physical
   channel is UMTS (`:57`, `:60`).
 
-**Correction (01/10, after Ange: "we already got 5G").** An earlier version of this section concluded that the
+**Correction (01/10, after the tester: "we already got 5G").** An earlier version of this section concluded that the
 modem never gets NR. The evidence doesn't support that, so it is withdrawn.
 - **What says 5G is used.** The modem's own data registration: `accessNetworkTechnology=NR` and
   `getRilDataRadioTechnology=20(NR_SA)` (`04_telephony_registry.txt:10`, 30×, from 10:37:33 on 01/10, `:287`), a data call set up on 5G
   (`SETUP_DATA_CALL … accessNetworkType=NGRAN`, `05_ril_ims_logcat.txt:3195`), the 5G icon
-  (`mTelephonyDisplayInfo network=NR`, `logcatjsp.log:57`), and Ange's own use of the phone.
+  (`mTelephonyDisplayInfo network=NR`, `logcatjsp.log:57`), and the tester's own use of the phone.
 - **What is only the framework's view.** `GET_RADIO_CAPABILITY 130047` (`radio_capability.txt:4`) and the filtered
   bitmap `21380` (`logcatjsp.log:54`) are what the framework computes and sends. They don't prove what the modem uses.
   The live modem default is `persist.radio.def_network=26`, which includes NR (`logcatjsp.log:8`). *Inferred:* this
@@ -137,7 +137,7 @@ modem never gets NR. The evidence doesn't support that, so it is withdrawn.
 
 So nothing is blocked on 5G and no RIL work follows. The `sehradiomanager` lead (`docs/TASK_0928_sehradio.md`) also
 fails its precondition: the stock `radio.network-V1-ndk` interface hash is `8fb94cb4cf759f224987eb2d1908582a1f6f1600`
-(Ange, 01/10), not Lineage's `0fac7647ce0de55319d9c5fa53bdf92cfdc1a5c2` (`android_hardware_samsung` `bb6e7b2`
+(the tester, 01/10), not Lineage's `0fac7647ce0de55319d9c5fa53bdf92cfdc1a5c2` (`android_hardware_samsung` `bb6e7b2`
 `interfaces/radio/network/aidl/aidl_api/vendor.samsung.hardware.radio.network/1/.hash`). The client is not shipped.
 
 **Still true from this capture:**
@@ -146,9 +146,9 @@ fails its precondition: the stock `radio.network-V1-ndk` interface hash is `8fb9
 - Free's carrier config allows NSA and SA.
 - Still untested: a VoLTE call while data is on NR (§4).
 
-## 7. Default mode 33 (Ange, 01/10 17:12)
+## 7. Default mode 33 (the tester, 01/10 17:12)
 
-Ange wants the mode picked on the phone to be the default: Phone info shows "NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
+The tester wants the mode picked on the phone to be the default: Phone info shows "NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA",
 i.e. `NETWORK_MODE_NR_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 33` (L-fb `RILConstants.java:253`).
 
 - **Change:** `ro.telephony.default_network=33,33` in `device/vendor.prop` (one value per slot).
@@ -208,9 +208,9 @@ adb logcat -d -b main,radio | grep -E 'filteredRafBitMask|GET_ALLOWED_NETWORK_TY
 `filteredRafBitMask` should hold the NR bit 524288 (TelephonyManager bit = network type − 1, NR = 20); with mode 33
 and 2G allowed it is 654335 (130047 + NR). Phone info should then show NR/LTE/TDSCDMA/CDMA/EvDo/GSM/WCDMA.
 
-## 9. Default changed to 4G/5G only (Ange, 01/10 17:41)
+## 9. Default changed to 4G/5G only (the tester, 01/10 17:41)
 
-Ange: the modem reaches 5G when the preferred type is NR, so the default should be 4G/5G only.
+The tester: the modem reaches 5G when the preferred type is NR, so the default should be 4G/5G only.
 `ro.telephony.default_network=24,24`: `NETWORK_MODE_NR_LTE = 24` (L-fb `RILConstants.java:226`), which replaces
 mode 33 from §7 (same prop, same rules: only for a SIM with no saved choice). "Allow 2G" no longer matters, since
 mode 24 has no 2G. Without §8's patch the mask would be LTE only (24 masked by 130047 drops NR), so the patch stays.

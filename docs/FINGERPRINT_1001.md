@@ -1,6 +1,6 @@
 # Fingerprint (under-display): where the sensor geometry comes from (01/10, PR D)
 
-Task: `docs/TASK_1001_multi(1).md` PR D. Symptom (Ange): the enroll zone never appears.
+Task: `docs/TASK_1001_multi(1).md` PR D. Symptom (the tester): the enroll zone never appears.
 
 **Outcome: one overlay change (section 7).** The HAL reports an **optical UDFPS** with an **empty location** (section 6),
 so SystemUI draws its overlay but its sensor area is 0,0-0,0 and no touch reaches the HAL. The location now comes from
@@ -119,7 +119,7 @@ Samsung's AIDL binary.
   derived from `/sys/class/fingerprint/fingerprint/position` only if its format can be cited). If (a), the next step is
   the HAL's own log lines at start and the Samsung extension, not an overlay.
 
-## 4. Capture for Ange (exact commands)
+## 4. Capture for the tester (exact commands)
 
 Reboot the phone first, then run within a few minutes (the logcat buffers rotate):
 
@@ -183,7 +183,7 @@ in each file (line in the full logcat).
 - Every touch is logged `NormalizedTouchData [UNCHANGED]` with `sessionId: -1` (from :21755 on): 161 touches, x 523-643,
   y 1896-2108. None falls inside the 0-size sensor rectangle, so SystemUI never sends `onPointerDown` to the HAL and the
   optical sensor is never lit. That matches "the zone never appears".
-- Those 161 touches are where Ange put his finger, **not a sensor geometry**. They are only a sanity check for the
+- Those 161 touches are where the tester put a finger, **not a sensor geometry**. They are only a sanity check for the
   numbers of 6.3: the sensor centre should fall inside that cluster.
 - `FingerprintManager: Invalid acquired message: 6, 10001` (:21109): acquired code 6 (vendor) with Samsung vendor code
   10001, logged by `LOS fb` `core/java/android/hardware/fingerprint/FingerprintManager.java:1554` when no string matches. Harmless by itself.
@@ -282,7 +282,7 @@ adb logcat -d | grep "avc:" | grep -iE "fingerprint|biometric"
 
 Files: `docs/check_1001_1450.txt`, `docs/8_enroll2_fp.txt`, `docs/10_tsp_cmd_list.txt`, `docs/11_sysui_udfps.txt`
 (the `9_crash.txt` file is empty; the 14:49 SIGSEGVs are `samsung.hardware.media.c2`, handled in another thread).
-Line numbers are the `grep -n` prefixes kept in `8_enroll2_fp.txt` (line in Ange's full logcat).
+Line numbers are the `grep -n` prefixes kept in `8_enroll2_fp.txt` (line in the tester's full logcat).
 
 ### 8.1 What now works
 - `check_1001_1450.txt` (fingerprint section): `fingerprintSensorLocation=Point(540, 2039)`,
@@ -355,7 +355,7 @@ Files: `docs/12_seh_ndk_strings.txt`, `docs/13_hal_strings.txt`, `docs/14_servic
   `/apex/com.samsung.android.biometrics.fingerprint/lib64/libsfp_sensor.so`, `/vendor/lib64/libsfp_sensor.so`, `load apex ca`,
   `apex version is empty`, `MakeSehFingerprint() dlsym fail`, and the symbol
   `vendor::samsung::hardware::biometrics::fingerprint::FingerprintInjector::MakeSehFingerprint(IFingerprint*)`
-  (`strings` of the binary pulled by Ange, 102920 bytes, same size as `reference/stock/vendor_ls_Z.txt:333`). The
+  (`strings` of the binary pulled by the tester, 102920 bytes, same size as `reference/stock/vendor_ls_Z.txt:333`). The
   sensor/TA logic, and whatever starts a capture, is in **`libsfp_sensor.so`** (APEX path first, then `/vendor/lib64`; see 9.2: on our image it is the `/vendor/lib64` one)
   (`vendor/apex/com.samsung.android.biometrics.fingerprint.signed.apex`, `device/proprietary-files.txt:360`).
 - `libsfp_sensor.so` is also the name Lineage's open-source Samsung fingerprint HAL loads (`LOS hs`
@@ -447,7 +447,7 @@ dependency of `libsfp_sensor.so` is missing: `adb shell ls /vendor/lib64 | grep 
 The first build with PR #33 stopped with `module "secril_config_svc" found in multiple namespaces (hardware/samsung and
 vendor/samsung/essi)`. `hardware/samsung` is one Soong namespace (root `Android.bp`), and its
 `ril/secril_config_svc/Android.bp:18` builds a `secril_config_svc` binary. We ship Samsung's stock one
-(`device/proprietary-files.txt:414`), so the vendor tree has a prebuilt module of the same name. Ange's scan found no
+(`device/proprietary-files.txt:414`), so the vendor tree has a prebuilt module of the same name. The tester's scan found no
 other duplicate. `patches/hardware/samsung/0001-…` deletes that one `Android.bp` (it defines nothing else, and no other file
 in `hardware/samsung` references the module); the fingerprint HAL is untouched. Apply it after cloning `projects.txt`:
 `git -C hardware/samsung apply "$ESSI/patches/hardware/samsung/"*.patch`.
@@ -455,7 +455,7 @@ in `hardware/samsung` references the module); the fingerprint HAL is untouched. 
 ### 10.5 Second clash: `vendor.samsung.hardware.radio.network-V1-ndk` (01/10; superseded by §10.6)
 The next build stopped in Kati: `vendor.samsung.hardware.radio.network-V1-ndk` is defined by our stock blob
 (`device/proprietary-files.txt:204`) and by `hardware/samsung`'s `aidl_interface vendor.samsung.hardware.radio.network`
-(`interfaces/radio/network/aidl/Android.bp`, version 1), which generates `…-V1-ndk`. Ange's scan compared plain
+(`interfaces/radio/network/aidl/Android.bp`, version 1), which generates `…-V1-ndk`. The tester's scan compared plain
 `name:` values, so it missed generated names.
 
 Full scan (script over every `Android.bp` of `hardware/samsung` at `bb6e7b20`, expanding `aidl_interface` to
@@ -489,7 +489,7 @@ No other `hardware/samsung` `Android.bp` mentions fingerprint (`grep -rl fingerp
 ### 10.6 HAL copied into the device tree; `hardware/samsung` removed (01/10)
 The build after 10.5 stopped on `overriding commands for target …/vendor/etc/vintf/manifest/memtrack.xml`. Putting
 `hardware/samsung` in `PRODUCT_SOONG_NAMESPACES` exports all its modules to Make, so every HAL in it got installed.
-Ange asked to stop patching it one module at a time and to do what PR #29 did for the camera shim. So:
+The tester asked to stop patching it one module at a time and to do what PR #29 did for the camera shim. So:
 
 - `device/fingerprint/` is an unmodified copy of `aidl/fingerprint/` at `bb6e7b20` (`diff -r` empty), with a README
   citing the source. Its includes are local, the generated sysprop header, or AOSP libraries already in `shared_libs`

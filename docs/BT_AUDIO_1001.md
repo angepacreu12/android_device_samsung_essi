@@ -144,7 +144,7 @@ adb shell 'ls -l /apex/com.android.hardware.audio*/etc/vintf/ /vendor/etc/vintf/
 
 Go ahead if there's no `IModule/a2dp` and no `android.hardware.bluetooth.audio.IBluetoothAudioProviderFactory`.
 
-**Result (Ange, 01/10 11:29, `service list`):** the audio instances are `IConfig/default` and `IModule/{bluetooth,default,r_submix}`,
+**Result (the tester, 01/10 11:29, `service list`):** the audio instances are `IConfig/default` and `IModule/{bluetooth,default,r_submix}`,
 plus `ISecAudioHal/default`, `ISehBluetooth/default` and `ISehBluetoothAudioProviderFactory/default`. There is no
 `IModule/a2dp` and no AOSP `IBluetoothAudioProviderFactory`, so the build can go ahead. The first point of section 4
 is settled.
@@ -179,7 +179,7 @@ If audio stays silent, run `adb bugreport`, or at least B and C in full, and sen
 
 ## 7. 01/10 15:11 test: connected, silent, routed to Samsung's primary module
 
-Ange's captures are `docs/13_audio.txt` to `docs/17_audio.txt`; `16_audio.txt` is empty. The headset was
+The tester's captures are `docs/13_audio.txt` to `docs/17_audio.txt`; `16_audio.txt` is empty. The headset was
 connected and playing, with no sound.
 
 ### What works
