@@ -1,0 +1,44 @@
+essi: LineageOS / e/OS device tree and vendor SELinux tooling for the Samsung Galaxy A56 5G (SM-A566B)
+Copyright (C) 2026 dxjsk
+
+Unless a file says otherwise, this repository is licensed under the Apache License, Version 2.0 (LICENSE).
+
+Third-party material
+--------------------
+
+- LineageOS (Apache-2.0)
+  - device/fingerprint/: copied from LineageOS android_hardware_samsung (aidl/fingerprint), with its headers.
+  - device/shims/libsensorndkbridge/: from LineageOS, with its headers.
+  - device/extract-files.py, device/setup-makefiles.py and the makefile/blueprint skeletons follow the
+    LineageOS device tree templates ("SPDX-FileCopyrightText: The LineageOS Project").
+
+- Android Open Source Project / LineageOS (Apache-2.0)
+  - reference/baseline/ and reference/system/: SELinux policy files produced by building AOSP system/sepolicy
+    and LineageOS device/lineage/sepolicy. No Samsung content. tools/cil2te.py and the checks need them.
+  - patches/frameworks/, patches/packages/apps/Settings/: changes to AOSP/LineageOS projects. They carry the
+    license of the project they patch (Apache-2.0).
+
+- PhhIms / ims-for-wisdom (GPL-2.0)
+  - patches/packages/apps/PhhIms/: patches to https://github.com/xuanyayi/ims-for-wisdom (GPL-2.0, derived
+    from krazey/ims and phhusson/ims). Patches 0001 and 0002 are upstream commits by krazey <admin@krazey.de>,
+    with the original authorship kept in their headers. These patch files are GPL-2.0, not Apache-2.0.
+
+- Samsung / Exynos configuration text
+  - device/rootdir/ (fstab, wifi.rc, recovery init scripts), device/configs/audio/ and parts of
+    device/manifest.xml are modified versions of configuration files from the stock A566BXXS6AYGE firmware.
+    Most Exynos device trees include files like these so that the stock vendor binaries can start. They are
+    included only for interoperability. Files that would be verbatim stock copies (vendor/bin helper scripts,
+    ramdisk configuration) are not in git: they are extracted like the blobs.
+
+What this repository does NOT contain
+-------------------------------------
+
+No Samsung binaries and no Samsung-derived SELinux policy:
+- kernel, dtb, dtbo, kernel modules (.ko), vendor_boot ramdisk firmware, binaries and configuration: extracted locally from
+  your own firmware with tools/extract_prebuilts.sh into the gitignored device/prebuilts/.
+- vendor blobs: extracted locally with device/extract-files.py into vendor/samsung/essi (separate tree).
+- device/sepolicy/vendor/: generated locally by tools/cil2te.py from your own firmware's vendor policy
+  (reference/stock/, filled by tools/populate_reference.sh). Both directories are gitignored.
+
+"Samsung", "Galaxy" and "Exynos" are trademarks of Samsung Electronics Co., Ltd. This project is not affiliated
+with or endorsed by Samsung.
